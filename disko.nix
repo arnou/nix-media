@@ -1,0 +1,39 @@
+# Disko: installation UEFI sur un SSD dedie. DESTRUCTIF lors de `disko --mode disko`.
+# Remplacer le chemin ci-dessous par le vrai /dev/disk/by-id/ du SSD cible.
+{ ... }:
+{
+  disko.devices.disk.system = {
+    type = "disk";
+    device = "/dev/sda";
+    content = {
+      type = "gpt";
+      partitions = {
+        ESP = {
+          size = "1G";
+          type = "EF00";
+          content = {
+            type = "filesystem";
+            format = "vfat";
+            mountpoint = "/boot";
+            mountOptions = [ "umask=0077" ];
+          };
+        };
+        swap = {
+          size = "8G";
+          content = {
+            type = "swap";
+            resumeDevice = false;
+          };
+        };
+        root = {
+          size = "100%";
+          content = {
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/";
+          };
+        };
+      };
+    };
+  };
+}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Media Center</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 70% 10%,#1b3456,#0b1322 65%);color:#f4f7ff;padding:clamp(24px,5vw,70px)}header{display:flex;align-items:baseline;justify-content:space-between;gap:15px}h1{font-size:clamp(32px,4vw,58px);margin:0}p{color:#aebbd0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:45px;max-width:1100px}.tile{display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border:1px solid #415270;background:#1a2a43;border-radius:22px;padding:28px;color:inherit;text-decoration:none;text-align:left;cursor:pointer;font:inherit;transition:.15s}.tile:hover,.tile:focus-visible{background:#29446c;outline:3px solid #84c7ff;transform:translateY(-2px)}.symbol{font-size:42px}.name{font-size:clamp(24px,3vw,36px);font-weight:750}.detail{font-size:15px;color:#bdcbe0}.footer{margin-top:28px;color:#b9c7d9}.footer button{background:transparent;border:1px solid #667b98;border-radius:8px;padding:10px;color:white;cursor:pointer}#status{min-height:1.5em}@media(max-width:650px){.grid{grid-template-columns:1fr}.tile{min-height:150px}}
+</style></head><body>
+<header><div><h1>Media Center</h1><p>ThinkCentre M720q · NixOS</p></div><div id="clock" aria-label="Heure"></div></header>
+<main class="grid">
+<button class="tile" id="kodi"><span class="symbol">🎬</span><span class="name">Kodi</span><span class="detail">Films · séries · NAS</span></button>
+<a class="tile" href="https://www.youtube.com/"><span class="symbol">▶️</span><span class="name">YouTube</span><span class="detail">Chaînes · vidéos · directs</span></a>
+<a class="tile" href="https://www.twitch.tv/"><span class="symbol">📡</span><span class="name">Twitch</span><span class="detail">Lives · replays</span></a>
+<button class="tile" id="jellyfin"><span class="symbol">📺</span><span class="name">Jellyfin</span><span class="detail">Bibliothèque sur ton serveur</span></button>
+</main><div class="footer"><button id="settings">Configurer l'adresse Jellyfin</button><p id="status" role="status"></p><p>Astuce : Alt + ← pour revenir au menu depuis un site web. Échap pour quitter Kodi.</p></div>
+<script>
+const status = document.getElementById('status');
+function clock(){document.getElementById('clock').textContent=new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(new Date())}clock();setInterval(clock,30000);
+document.getElementById('kodi').addEventListener('click',async()=>{try{const r=await fetch('/launch/kodi',{method:'POST'});if(!r.ok)throw Error('HTTP '+r.status);status.textContent='Ouverture de Kodi…'}catch(e){status.textContent='Impossible de lancer Kodi : '+e.message}});
+function configure(){const previous=localStorage.getItem('jellyfinUrl')||'http://jellyfin.local:8096';const value=prompt('Adresse du serveur Jellyfin (http://IP:8096 ou https://domaine)',previous);if(value===null)return;try{const url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw Error();localStorage.setItem('jellyfinUrl',url.href);status.textContent='Adresse Jellyfin enregistrée.'}catch{status.textContent='Adresse invalide : utilise http:// ou https://.'}}
+document.getElementById('settings').addEventListener('click',configure);
+document.getElementById('jellyfin').addEventListener('click',()=>{const url=localStorage.getItem('jellyfinUrl');if(!url){configure();return}location.href=url});
+</script></body></html>
